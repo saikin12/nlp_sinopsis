@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Drop — latest release</title>
+    <meta
+      name="description"
+      content="A quiet landing for the latest GitHub release. The archive downloads automatically."
+    />
+    <meta name="theme-color" content="#09090b" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600&family=Syne:wght@700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="./css/styles.css" />
+  </head>
+  <body>
+    <div class="noise" aria-hidden="true"></div>
+    <div class="orb orb-a" aria-hidden="true"></div>
+    <div class="orb orb-b" aria-hidden="true"></div>
+
+    <div class="wrap">
+      <header class="top">
+        <a class="brand" href="./">
+          <svg class="mark" viewBox="0 0 36 36" aria-hidden="true">
+            <rect width="36" height="36" rx="10" fill="#d6ff3c" />
+            <path d="M10 20.5 16.2 26 26 12" fill="none" stroke="#10140a" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          <span id="brandName">Drop</span>
+        </a>
+        <a class="ghost" id="repoLink" href="https://github.com" rel="noopener">View on GitHub</a>
+      </header>
+
+      <main class="stage">
+        <section class="card" id="card" aria-live="polite">
+          <p class="kicker"><span class="pulse" aria-hidden="true"></span> <span id="kicker">Latest release</span></p>
+          <h1 id="title">Your archive is on the way.</h1>
+          <p class="lede" id="subtitle">
+            The download starts automatically. Keep this tab open until the file is saved.
+          </p>
+
+          <p class="status" id="status">Warming up…</p>
+          <div class="bar" id="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+            <div class="fill" id="fill"></div>
+          </div>
+          <div class="meta">
+            <span id="bytes">0 B of —</span>
+            <span class="pct" id="pct">0%</span>
+          </div>
+
+          <div class="actions">
+            <button class="btn" id="primary" type="button">Start download</button>
+            <a class="btn secondary" id="fallback" href="#" hidden>Direct link</a>
+          </div>
+
+          <p class="file">Asset · <b id="fileName">Resolving…</b></p>
+        </section>
+      </main>
+
+      <footer class="foot">
+        <span>GitHub Pages</span>
+        <span id="speed">—</span>
+      </footer>
+    </div>
+
+    <script src="./js/config.js"></script>
+    <script src="./js/app.js"></script>
+  </body>
+</html>
