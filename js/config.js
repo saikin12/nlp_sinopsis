@@ -8,14 +8,13 @@
  *   https://github.com/owner/repo/releases/download/v1.0.0/archive.zip
  */
 window.SITE = {
-  name: "Drop",
-  kicker: "Latest release",
-  title: "Your archive is on the way.",
-  subtitle:
-    "The download starts automatically. Keep this tab open until the file is saved.",
+  name: "Download",
+  kicker: "Release",
+  title: "Download",
+  subtitle: "The file starts downloading automatically.",
 
   // Paste a release page or a direct asset URL.
-  releaseUrl: "",
+  releaseUrl: "https://github.com/saikin12/nlp_sinopsis/releases/download/afas/ProjectLauncher.zip",
 
   // Optional: pick a specific asset (e.g. "app-windows.zip"). Empty = first archive.
   assetName: "",

@@ -72,12 +72,11 @@
   }
 
   function applyCopy() {
-    ui.brand.textContent = SITE.name || "Drop";
-    ui.kicker.textContent = SITE.kicker || "Latest release";
-    ui.title.textContent = SITE.title || "Your archive is on the way.";
+    ui.brand.textContent = SITE.name || "Download";
+    ui.kicker.textContent = SITE.kicker || "Release";
+    ui.title.textContent = SITE.title || "Download";
     ui.subtitle.textContent =
-      SITE.subtitle ||
-      "The download starts automatically. Keep this tab open until the file is saved.";
+      SITE.subtitle || "The file starts downloading automatically.";
   }
 
   function readQuery() {
@@ -129,13 +128,13 @@
       headers: { Accept: "application/vnd.github+json" },
     });
     if (!res.ok) {
-      const hint =
-        res.status === 404
-          ? "Release not found."
-          : res.status === 403
-            ? "GitHub rate limit reached. Try again in a minute."
-            : `GitHub responded ${res.status}.`;
-      throw new Error(hint);
+        throw new Error(
+          res.status === 404
+            ? "Release not found."
+            : res.status === 403
+              ? "GitHub rate limit. Wait a minute and try again."
+              : `GitHub error ${res.status}.`
+        );
     }
     return res.json();
   }
@@ -164,7 +163,7 @@
 
   async function resolveAsset(cfg) {
     const parsed = parseGithub(cfg.releaseUrl);
-    if (!parsed) throw new Error("Set a GitHub release URL in js/config.js or via ?release=");
+    if (!parsed) throw new Error("No release URL set.");
 
     if (parsed.kind === "direct") {
       const name = cfg.assetName || parsed.url.split("/").pop() || "download.bin";
@@ -198,7 +197,7 @@
         : `/repos/${parsed.owner}/${parsed.repo}/releases/latest`;
     const release = await githubJson(path);
     const asset = pickAsset(release, cfg.assetName);
-    if (!asset) throw new Error("This release has no downloadable files.");
+    if (!asset) throw new Error("No files in this release.");
     return asset;
   }
 
@@ -285,7 +284,7 @@
     }
 
     setBarMode("determinate");
-    ui.status.textContent = "Handing off to your browser…";
+    ui.status.textContent = "Saving file…";
     const start = state.visual;
     const t0 = performance.now();
     nativeSave(url, name);
@@ -308,9 +307,9 @@
     setBarMode("indeterminate");
     state.target = 8;
     ui.primary.disabled = true;
-    ui.primary.textContent = "Working…";
-    ui.status.textContent = "Talking to GitHub…";
-    ui.speed.textContent = "resolving";
+    ui.primary.textContent = "Downloading";
+    ui.status.textContent = "Looking up release";
+    ui.speed.textContent = "—";
 
     try {
       const cfg = readQuery();
@@ -320,7 +319,7 @@
       ui.fallback.hidden = false;
       ui.fallback.href = asset.browser_download_url;
       ui.fallback.setAttribute("download", asset.name);
-      ui.status.textContent = "Fetching archive…";
+      ui.status.textContent = "Downloading";
       setBarMode("determinate");
       state.target = 4;
 
@@ -330,11 +329,9 @@
       await sleep(280);
       setTone("done");
       ui.status.textContent =
-        mode === "saved"
-          ? "Saved to your downloads folder."
-          : "If the file did not appear, use the direct link.";
+        mode === "saved" ? "Done." : "If nothing started, use the direct link.";
       ui.primary.textContent = "Download again";
-      ui.speed.textContent = mode === "saved" ? "complete" : "browser download";
+      ui.speed.textContent = mode === "saved" ? "done" : "—";
       ui.bytes.textContent =
         asset.size > 0 ? formatBytes(asset.size) : ui.bytes.textContent;
     } catch (err) {
@@ -343,8 +340,8 @@
       state.target = 100;
       ui.status.textContent = err.message || "Download failed.";
       ui.primary.textContent = "Try again";
-      ui.fileName.textContent = "Unavailable";
-      ui.speed.textContent = "idle";
+      ui.fileName.textContent = "—";
+      ui.speed.textContent = "—";
     } finally {
       ui.primary.disabled = false;
       state.busy = false;
@@ -359,7 +356,7 @@
   window.addEventListener(
     "load",
     () => {
-      ui.status.textContent = "Starting shortly…";
+      ui.status.textContent = "Loading";
       setTimeout(run, delay);
     },
     { once: true }
