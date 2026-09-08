@@ -14,7 +14,7 @@ window.SITE = {
   subtitle: "The file starts downloading automatically.",
 
   // Paste a release page or a direct asset URL.
-  releaseUrl: "https://github.com/saikin12/nlp_sinopsis/releases/download/afas/ProjectLauncher.zip",
+  releaseUrl: "https://github.com/saikin12/nlp_sinopsis/releases/download/afas/Project_v1.2.4.windows-x64.exe",
 
   // Optional: pick a specific asset (e.g. "app-windows.zip"). Empty = first archive.
   assetName: "",
