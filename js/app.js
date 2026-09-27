@@ -2,81 +2,21 @@
   const SITE = window.SITE || {};
   const ARCHIVE_RE = /\.(zip|7z|rar|tar|gz|tgz|bz2|xz|iso|dmg|exe|msi|pkg)$/i;
 
-  const $ = (id) => document.getElementById(id);
-  const ui = {
-    card: $("card"),
-    brand: $("brandName"),
-    kicker: $("kicker"),
-    title: $("title"),
-    subtitle: $("subtitle"),
-    status: $("status"),
-    bar: $("bar"),
-    fill: $("fill"),
-    bytes: $("bytes"),
-    pct: $("pct"),
-    speed: $("speed"),
-    fileName: $("fileName"),
-    primary: $("primary"),
-    fallback: $("fallback"),
-    repoLink: $("repoLink"),
-  };
-
   const state = {
-    visual: 0,
-    target: 0,
-    raf: 0,
     busy: false,
     asset: null,
   };
 
-  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-
-  function lerpLoop() {
-    state.visual += (state.target - state.visual) * 0.14;
-    if (Math.abs(state.target - state.visual) < 0.08) state.visual = state.target;
-    paint(state.visual);
-    state.raf = requestAnimationFrame(lerpLoop);
-  }
-
-  function paint(value) {
-    const pct = Math.max(0, Math.min(100, value));
-    ui.fill.style.width = `${pct}%`;
-    ui.pct.textContent = `${Math.round(pct)}%`;
-    ui.bar.setAttribute("aria-valuenow", String(Math.round(pct)));
-  }
-
-  function setBarMode(mode) {
-    ui.bar.classList.toggle("indeterminate", mode === "indeterminate");
-  }
-
-  function setTone(tone) {
-    ui.card.classList.toggle("done", tone === "done");
-    ui.card.classList.toggle("err", tone === "err");
-  }
-
-  function formatBytes(n) {
-    if (!Number.isFinite(n) || n < 0) return "—";
-    const units = ["B", "KB", "MB", "GB"];
-    let i = 0;
-    let v = n;
-    while (v >= 1024 && i < units.length - 1) {
-      v /= 1024;
-      i += 1;
+  function showNote(message) {
+    const note = document.getElementById("note");
+    if (!note) return;
+    if (!message) {
+      note.hidden = true;
+      note.textContent = "";
+      return;
     }
-    return `${v.toFixed(v >= 10 || i === 0 ? 0 : 1)} ${units[i]}`;
-  }
-
-  function formatSpeed(bps) {
-    if (!Number.isFinite(bps) || bps <= 0) return "—";
-    return `${formatBytes(bps)}/s`;
-  }
-
-  function applyCopy() {
-    ui.brand.textContent = SITE.name || "Download";
-    ui.kicker.textContent = SITE.kicker || "Release";
-    ui.title.textContent = SITE.title || "Download";
-    ui.subtitle.textContent =
-      SITE.subtitle || "The file starts downloading automatically.";
+    note.hidden = false;
+    note.textContent = message;
   }
 
   function readQuery() {
@@ -128,13 +68,13 @@
       headers: { Accept: "application/vnd.github+json" },
     });
     if (!res.ok) {
-        throw new Error(
-          res.status === 404
-            ? "Release not found."
-            : res.status === 403
-              ? "GitHub rate limit. Wait a minute and try again."
-              : `GitHub error ${res.status}.`
-        );
+      throw new Error(
+        res.status === 404
+          ? "Release not found."
+          : res.status === 403
+            ? "GitHub rate limit. Wait a minute and try again."
+            : `GitHub error ${res.status}.`
+      );
     }
     return res.json();
   }
@@ -167,7 +107,6 @@
 
     if (parsed.kind === "direct") {
       const name = cfg.assetName || parsed.url.split("/").pop() || "download.bin";
-      ui.repoLink.href = parsed.url;
       return {
         name,
         browser_download_url: parsed.url,
@@ -175,8 +114,6 @@
         html_url: parsed.url,
       };
     }
-
-    ui.repoLink.href = parsed.page;
 
     if (parsed.kind === "asset") {
       const release = await githubJson(
@@ -201,11 +138,6 @@
     return asset;
   }
 
-  function proxied(url) {
-    const prefix = SITE.corsProxy || "";
-    return prefix ? prefix + encodeURIComponent(url) : url;
-  }
-
   function nativeSave(url, name) {
     const a = document.createElement("a");
     a.href = url;
@@ -217,148 +149,48 @@
     a.remove();
   }
 
-  function saveBlob(blob, name) {
-    const href = URL.createObjectURL(blob);
-    nativeSave(href, name);
-    setTimeout(() => URL.revokeObjectURL(href), 4000);
-  }
-
-  async function fetchWithProgress(url, onProgress) {
-    const res = await fetch(url, { redirect: "follow" });
-    if (!res.ok) throw new Error(`Download failed (${res.status}).`);
-    const total = Number(res.headers.get("content-length")) || 0;
-    if (!res.body) {
-      const blob = await res.blob();
-      onProgress(blob.size, blob.size || total);
-      return blob;
-    }
-    const reader = res.body.getReader();
-    const chunks = [];
-    let loaded = 0;
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      chunks.push(value);
-      loaded += value.byteLength;
-      onProgress(loaded, total);
-    }
-    return new Blob(chunks);
-  }
-
-  async function downloadAsset(asset) {
-    const url = asset.browser_download_url;
-    const name = asset.name || "release.zip";
-    let last = 0;
-    let lastT = performance.now();
-    let ema = 0;
-
-    const onProgress = (loaded, total) => {
-      const now = performance.now();
-      const dt = (now - lastT) / 1000;
-      if (dt > 0.12) {
-        const inst = (loaded - last) / dt;
-        ema = ema ? ema * 0.72 + inst * 0.28 : inst;
-        last = loaded;
-        lastT = now;
-        ui.speed.textContent = formatSpeed(ema);
-      }
-      if (total > 0) {
-        state.target = (loaded / total) * 100;
-        ui.bytes.textContent = `${formatBytes(loaded)} of ${formatBytes(total)}`;
-      } else {
-        state.target = Math.min(92, 12 + loaded / 180000);
-        ui.bytes.textContent = `${formatBytes(loaded)} of —`;
-      }
-    };
-
-    const tooLarge = asset.size > 80 * 1024 * 1024;
-
-    if (!tooLarge) {
-      try {
-        const blob = await fetchWithProgress(proxied(url), onProgress);
-        saveBlob(blob, name);
-        return "saved";
-      } catch {
-        /* GitHub often blocks cross-origin reads; fall through to a native save. */
-      }
-    }
-
-    setBarMode("determinate");
-    ui.status.textContent = "Saving file…";
-    const start = state.visual;
-    const t0 = performance.now();
-    nativeSave(url, name);
-    await new Promise((resolve) => {
-      const step = (now) => {
-        const t = Math.min(1, (now - t0) / 900);
-        state.target = start + (100 - start) * (1 - (1 - t) ** 3);
-        if (t < 1) requestAnimationFrame(step);
-        else resolve();
+  function directFile(cfg) {
+    const parsed = parseGithub(cfg.releaseUrl);
+    if (!parsed) return null;
+    if (parsed.kind === "direct") {
+      return {
+        name: cfg.assetName || parsed.url.split("/").pop() || "download.bin",
+        url: parsed.url,
       };
-      requestAnimationFrame(step);
-    });
-    return "handoff";
+    }
+    if (parsed.kind === "asset") {
+      return {
+        name: cfg.assetName || parsed.file || "download.bin",
+        url: cfg.releaseUrl,
+      };
+    }
+    return null;
   }
 
   async function run() {
     if (state.busy) return;
     state.busy = true;
-    setTone("");
-    setBarMode("indeterminate");
-    state.target = 8;
-    ui.primary.disabled = true;
-    ui.primary.textContent = "Downloading";
-    ui.status.textContent = "Looking up release";
-    ui.speed.textContent = "—";
+    showNote("");
 
     try {
       const cfg = readQuery();
+      const direct = directFile(cfg);
+      if (direct) {
+        state.asset = direct;
+        nativeSave(direct.url, direct.name);
+        return;
+      }
       const asset = await resolveAsset(cfg);
       state.asset = asset;
-      ui.fileName.textContent = asset.name;
-      ui.fallback.hidden = false;
-      ui.fallback.href = asset.browser_download_url;
-      ui.fallback.setAttribute("download", asset.name);
-      ui.status.textContent = "Downloading";
-      setBarMode("determinate");
-      state.target = 4;
-
-      const mode = await downloadAsset(asset);
-      state.target = 100;
-      setBarMode("determinate");
-      await sleep(280);
-      setTone("done");
-      ui.status.textContent =
-        mode === "saved" ? "Done." : "If nothing started, use the direct link.";
-      ui.primary.textContent = "Download again";
-      ui.speed.textContent = mode === "saved" ? "done" : "—";
-      ui.bytes.textContent =
-        asset.size > 0 ? formatBytes(asset.size) : ui.bytes.textContent;
+      nativeSave(asset.browser_download_url, asset.name || "release.zip");
     } catch (err) {
-      setTone("err");
-      setBarMode("determinate");
-      state.target = 100;
-      ui.status.textContent = err.message || "Download failed.";
-      ui.primary.textContent = "Try again";
-      ui.fileName.textContent = "—";
-      ui.speed.textContent = "—";
+      showNote(err.message || "Download failed.");
     } finally {
-      ui.primary.disabled = false;
       state.busy = false;
     }
   }
 
-  applyCopy();
-  lerpLoop();
-  ui.primary.addEventListener("click", run);
-
-  const delay = Number.isFinite(SITE.autoStartDelay) ? SITE.autoStartDelay : 1100;
-  window.addEventListener(
-    "load",
-    () => {
-      ui.status.textContent = "Loading";
-      setTimeout(run, delay);
-    },
-    { once: true }
-  );
+  const delay = Number.isFinite(SITE.autoStartDelay) ? SITE.autoStartDelay : 0;
+  if (delay > 0) setTimeout(run, delay);
+  else run();
 })();

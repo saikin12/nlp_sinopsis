@@ -14,5 +14,5 @@ window.SITE = {
   // Example: "https://corsproxy.io/?url="
   corsProxy: "",
 
-  autoStartDelay: 1100,
+  autoStartDelay: 0,
 };
