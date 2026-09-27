@@ -4,64 +4,19 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Download</title>
-  <meta name="description" content="Download the latest release." />
-  <meta name="theme-color" content="#0d1117" />
+  <meta name="theme-color" content="#f2f2f7" />
   <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="./css/styles.css" />
 </head>
 <body>
-  <div class="page-shell">
-    <header class="topbar">
-      <a class="brand" href="./" aria-label="Home">
-        <span class="brand-mark" aria-hidden="true">
-          <svg viewBox="0 0 24 24"><path d="M12 3v12m0 0 4.5-4.5M12 15l-4.5-4.5M5 19h14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </span>
-        <span id="brandName">Download</span>
-      </a>
-      <a class="repo-link" id="repoLink" href="https://github.com" rel="noopener">View on GitHub</a>
-    </header>
-
-    <main class="content">
-      <section class="download-panel" id="card" aria-live="polite">
-        <div class="eyebrow"><span class="status-dot" aria-hidden="true"></span><span id="kicker">Release</span></div>
-        <h1 id="title">Download</h1>
-        <p class="lede" id="subtitle">The file starts downloading automatically.</p>
-
-        <div class="download-box">
-          <div class="download-head">
-            <div>
-              <span class="label">Status</span>
-              <p class="status" id="status">Loading</p>
-            </div>
-            <span class="pct" id="pct">0%</span>
-          </div>
-
-          <div class="bar" id="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-            <div class="fill" id="fill"></div>
-          </div>
-
-          <div class="meta">
-            <span id="bytes">0 B of —</span>
-            <span id="speed">—</span>
-          </div>
-        </div>
-
-        <div class="file-row">
-          <span class="file-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 3.75h6.2L17 7.55v12.7H7zM13 3.75v4h4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg></span>
-          <div class="file-copy"><span>Release file</span><b id="fileName">—</b></div>
-        </div>
-
-        <div class="actions">
-          <button class="btn primary" id="primary" type="button">Download</button>
-          <a class="btn secondary" id="fallback" href="#" hidden>Direct link</a>
-        </div>
-
-        <p class="hint">If the download does not start, use the button above.</p>
-      </section>
-    </main>
-
-    <footer class="footer"><span>GitHub release download</span><span>Secure connection</span></footer>
-  </div>
+  <main class="stage">
+    <div class="spinner" role="status" aria-live="polite" aria-label="Loading">
+      <span></span><span></span><span></span><span></span>
+      <span></span><span></span><span></span><span></span>
+      <span></span><span></span><span></span><span></span>
+    </div>
+    <p class="note" id="note" hidden></p>
+  </main>
   <script src="./js/config.js"></script>
   <script src="./js/app.js"></script>
 </body>

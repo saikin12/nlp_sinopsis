@@ -1,4 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <rect width="32" height="32" rx="8" fill="#d6ff3c"/>
-  <path d="M8 18.2 14.1 24 24 10" fill="none" stroke="#10140a" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect width="32" height="32" rx="8" fill="#1c1c1e"/>
+  <g fill="#f4f4f5" transform="translate(16 16)">
+    <rect x="-1.25" y="-11.2" width="2.5" height="5.4" rx="1.25" opacity="1" transform="rotate(0)"/>
+    <rect x="-1.25" y="-11.2" width="2.5" height="5.4" rx="1.25" opacity=".78" transform="rotate(45)"/>
+    <rect x="-1.25" y="-11.2" width="2.5" height="5.4" rx="1.25" opacity=".58" transform="rotate(90)"/>
+    <rect x="-1.25" y="-11.2" width="2.5" height="5.4" rx="1.25" opacity=".4" transform="rotate(135)"/>
+    <rect x="-1.25" y="-11.2" width="2.5" height="5.4" rx="1.25" opacity=".24" transform="rotate(180)"/>
+    <rect x="-1.25" y="-11.2" width="2.5" height="5.4" rx="1.25" opacity=".16" transform="rotate(225)"/>
+    <rect x="-1.25" y="-11.2" width="2.5" height="5.4" rx="1.25" opacity=".28" transform="rotate(270)"/>
+    <rect x="-1.25" y="-11.2" width="2.5" height="5.4" rx="1.25" opacity=".55" transform="rotate(315)"/>
+  </g>
 </svg>
